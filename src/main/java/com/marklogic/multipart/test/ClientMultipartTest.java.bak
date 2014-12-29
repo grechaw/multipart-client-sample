@@ -1,0 +1,66 @@
+package com.marklogic.multipart.test;
+
+import java.io.IOException;
+import java.util.Map;
+
+import javax.ws.rs.core.MultivaluedMap;
+
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import com.sun.jersey.api.client.filter.HTTPDigestAuthFilter;
+import com.sun.jersey.api.uri.UriComponent;
+import com.sun.jersey.client.apache4.ApacheHttpClient4;
+import com.sun.jersey.client.apache4.config.ApacheHttpClient4Config;
+import com.sun.jersey.client.apache4.config.DefaultApacheHttpClient4Config;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
+import com.sun.jersey.core.header.ContentDisposition;
+import com.sun.jersey.multipart.BodyPart;
+import com.sun.jersey.multipart.Boundary;
+import com.sun.jersey.multipart.MultiPart;
+import com.sun.jersey.multipart.MultiPartMediaTypes;
+
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.scheme.SchemeSocketFactory;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+
+public class ClientMultipartTest {
+
+	public static void main(String[] args) {
+		WebResource connection = null;
+		WebResource.Builder builder = null;
+		ApacheHttpClient4 client = null;
+		String baseUri = "http://localhost:9900/poll.xqy";
+		
+		Scheme scheme = new Scheme("http",9900,PlainSocketFactory.getSocketFactory());
+		SchemeRegistry schemeRegistry = new SchemeRegistry();
+		schemeRegistry.register(scheme);
+		ThreadSafeClientConnManager connMgr = new ThreadSafeClientConnManager(schemeRegistry);
+
+		DefaultApacheHttpClient4Config config = new DefaultApacheHttpClient4Config();
+		
+		Map<String, Object> configProps = config.getProperties();
+		configProps.put(ApacheHttpClient4Config.PROPERTY_CONNECTION_MANAGER,connMgr);
+		
+		client = ApacheHttpClient4.create(config);
+		client.addFilter(new HTTPDigestAuthFilter("user1", "password1"));
+				
+		MultivaluedMap queryParams = new MultivaluedMapImpl();
+		queryParams.add("domain", "15643207601807538105");
+		queryParams.add("target", "7989731150090911629");
+		
+		connection = client.resource(baseUri).queryParams(queryParams);
+		builder = connection.getRequestBuilder().accept("multipart/mixed");
+		ClientResponse response = null;
+		ClientResponse.Status status = null;
+		response = builder.get(ClientResponse.class);
+		status = response.getClientResponseStatus();
+		System.out.println("Status: "+status);
+		
+		response.close();
+		
+		
+	}
+}

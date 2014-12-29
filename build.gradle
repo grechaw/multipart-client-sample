@@ -1,0 +1,17 @@
+apply plugin: "java"
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.slf4j:slf4j-api:1.7.5'
+	compile 'org.glassfish.jersey.core:jersey-client:2.14'
+    compile 'org.glassfish.jersey.media:jersey-media-multipart:2.14'
+    testCompile "junit:junit:4.11"
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.1'
+}
